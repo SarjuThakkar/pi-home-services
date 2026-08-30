@@ -1,0 +1,31 @@
+services:
+  treehouse-library:
+    build: ./treehouse-library
+    container_name: treehouse-library
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      - /home/treehouse/Documents/TreehouseLibrary-main/library.db:/app/library.db
+      - /home/treehouse/Documents/TreehouseLibrary-main/.env:/app/.env:ro
+
+  chess-mcp:
+    build: ./chess-mcp
+    container_name: chess-mcp
+    restart: unless-stopped
+    ports:
+      - "8001:8000"
+    env_file: ./chess-mcp.env
+    volumes:
+      - chess-data:/data
+
+  skylight-mcp:
+    build: ./skylight-mcp
+    container_name: skylight-mcp
+    restart: unless-stopped
+    ports:
+      - "8002:8000"
+    env_file: ./skylight-mcp.env
+
+volumes:
+  chess-data:

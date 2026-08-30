@@ -1,0 +1,9 @@
+tunnel: 01e59e95-abab-48f1-94da-2fe13d9c41c8
+credentials-file: /home/treehouse/.cloudflared/01e59e95-abab-48f1-94da-2fe13d9c41c8.json
+
+ingress:
+  - hostname: chess.sarjuthakkar.com
+    service: http://localhost:8001
+  - hostname: skylight.sarjuthakkar.com
+    service: http://localhost:8002
+  - service: http_status:404
