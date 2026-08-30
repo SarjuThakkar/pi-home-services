@@ -1,2 +1,8 @@
 *.env
 !.env.example/*
+
+# Each service is its own independently git-managed clone, not part of
+# this repo -- see README for the expected sibling-directory layout.
+/chess-mcp/
+/skylight-mcp/
+/treehouse-library/
