@@ -27,5 +27,31 @@ services:
       - "8002:8000"
     env_file: ./skylight-mcp.env
 
+  # Matter controller. Talks to Matter devices (currently the Dreame vacuum)
+  # over the LAN and exposes a WebSocket API on port 5580 for dreame-mcp.
+  #
+  # network_mode: host is REQUIRED, not a convenience -- Matter relies on
+  # IPv6 link-local multicast and mDNS, which do not survive Docker's bridge
+  # NAT. For the same reason wlan0 needs IPv6 enabled on the host (see README).
+  #
+  # NOTE: python-matter-server was archived 2026-06-23; 8.1.2 is its final
+  # release. Its successor, matterjs-server, is a drop-in replacement with a
+  # compatible WebSocket API, so migrating later is an image swap plus a
+  # re-test -- no changes needed in dreame-mcp. Staying on the certified
+  # stable release until matterjs-server leaves beta.
+  matter-server:
+    image: ghcr.io/matter-js/python-matter-server:stable
+    container_name: matter-server
+    restart: unless-stopped
+    network_mode: host
+    security_opt:
+      # Needed for Bluetooth commissioning via D-Bus.
+      - apparmor:unconfined
+    volumes:
+      - matter-data:/data
+      - /run/dbus:/run/dbus:ro
+    command: --storage-path /data --paa-root-cert-dir /data/credentials --bluetooth-adapter 0
+
 volumes:
   chess-data:
+  matter-data:
