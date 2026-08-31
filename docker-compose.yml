@@ -53,6 +53,28 @@ services:
       - "8004:8000"
     env_file: ./nest-mcp.env
 
+  # Voice control for Goodreads. Goodreads retired its public API in 2020, so
+  # this drives a real signed-in Chromium instead -- which is why it needs a
+  # persistent profile volume (the session) and the Wayland socket (so the
+  # headed sign-in can appear on the touchscreen when the session expires).
+  goodreads-mcp:
+    build: ./goodreads-mcp
+    container_name: goodreads-mcp
+    restart: unless-stopped
+    ports:
+      - "8005:8000"
+    env_file: ./goodreads-mcp.env
+    volumes:
+      - goodreads-profile:/profile
+      - /run/user/1000:/run/user/1000
+    environment:
+      # Only consumed by authenticate.py; the server never renders anything.
+      WAYLAND_DISPLAY: wayland-0
+      XDG_RUNTIME_DIR: /run/user/1000
+    # Chromium wants more than Docker's default 64MB of shared memory and
+    # crashes with cryptic renderer errors below about 256MB.
+    shm_size: 512m
+
   # Matter controller. Talks to Matter devices (currently the Dreame vacuum)
   # over the LAN and exposes a WebSocket API on port 5580 for dreame-mcp.
   #
@@ -84,4 +106,5 @@ services:
 
 volumes:
   chess-data:
+  goodreads-profile:
   matter-data:

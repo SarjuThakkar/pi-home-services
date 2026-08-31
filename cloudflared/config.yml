@@ -10,4 +10,6 @@ ingress:
     service: http://localhost:8003
   - hostname: thermostat.sarjuthakkar.com
     service: http://localhost:8004
+  - hostname: books.sarjuthakkar.com
+    service: http://localhost:8005
   - service: http_status:404
