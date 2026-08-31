@@ -50,7 +50,11 @@ services:
     volumes:
       - matter-data:/data
       - /run/dbus:/run/dbus:ro
-    command: --storage-path /data --paa-root-cert-dir /data/credentials --bluetooth-adapter 0
+    # --primary-interface wlan0: the Pi is on WiFi, and this is what IPv6
+    # link-local addresses get scoped to when a device reports one without a
+    # usable scope_id. Without it the server logs "Using 'None' as primary
+    # interface" and can fail to reach devices by link-local address.
+    command: --storage-path /data --paa-root-cert-dir /data/credentials --bluetooth-adapter 0 --primary-interface wlan0
 
 volumes:
   chess-data:
