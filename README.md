@@ -22,6 +22,7 @@ now depends on home power/internet instead of a managed cloud platform.
 | chess-mcp | [trmnl-chess-mcp](https://github.com/SarjuThakkar/trmnl-chess-mcp) | Yes -- `chess.sarjuthakkar.com` | 8001 |
 | skylight-mcp | [skylight-mcp-pebble](https://github.com/SarjuThakkar/skylight-mcp-pebble) | Yes -- `skylight.sarjuthakkar.com` | 8002 |
 | dreame-mcp | [dreame-vacuum-mcp](https://github.com/SarjuThakkar/dreame-vacuum-mcp) | Yes -- `vacuum.sarjuthakkar.com` | 8003 |
+| nest-mcp | [nest-thermostat-mcp](https://github.com/SarjuThakkar/nest-thermostat-mcp) | Yes -- `thermostat.sarjuthakkar.com` | 8004 |
 | matter-server | (upstream image) | No (LAN only) | 5580 |
 
 Public exposure is via a named Cloudflare Tunnel (`pebble-services`,
@@ -38,16 +39,27 @@ Everything lives under `~/services/`, as siblings:
   docker-compose.yml         <- from this repo
   chess-mcp.env               <- real secrets, NOT in git (see below)
   dreame-mcp.env              <- real secrets, NOT in git
+  nest-mcp.env                <- real secrets, NOT in git
   skylight-mcp.env            <- real secrets, NOT in git
   chess-mcp/                  <- clone of trmnl-chess-mcp
-  skylight-mcp/                <- clone of skylight-mcp-pebble
+  skylight-mcp/               <- clone of skylight-mcp-pebble
   treehouse-library/          <- clone of TreehouseLibrary
   dreame-mcp/                 <- clone of dreame-vacuum-mcp
+  nest-mcp/                   <- clone of nest-thermostat-mcp
 ```
 
-`~/.cloudflared/config.yml` (from this repo's `cloudflared/config.yml`) and
-the tunnel credentials JSON (never committed) live outside `~/services/`,
-in the default `cloudflared` location.
+**The live tunnel config is `/etc/cloudflared/config.yml`** -- that is what the
+systemd unit loads (`cloudflared --config /etc/cloudflared/config.yml tunnel
+run`). It is a **symlink to this repo's `cloudflared/config.yml`**, so editing
+the file here *is* editing the live config; only a `systemctl restart
+cloudflared` is needed to apply it.
+
+This is worth stating plainly because it was previously three separate copies
+(`/etc/cloudflared/`, `~/.cloudflared/`, and this repo) that silently drifted:
+a hostname added to the repo copy had no effect and returned 404 from the
+tunnel's catch-all. `~/.cloudflared/config.yml` still exists but nothing reads
+it. The tunnel credentials JSON (never committed) does live in
+`~/.cloudflared/`.
 
 treehouse-library's live `library.db` and `.env` are bind-mounted from
 their original location at `/home/treehouse/Documents/TreehouseLibrary-main/`
@@ -105,8 +117,9 @@ deleted or the device is factory reset.
 2. Install `cloudflared` (see [Cloudflare's docs](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/install-and-setup/installation/)), then `cloudflared tunnel login` and `cloudflared tunnel create pebble-services`
 3. Clone this repo and each service repo as siblings under `~/services/` (see layout above)
 4. Copy `.env.example/*.env.example` to `~/services/*.env` and fill in real values
-5. Copy `cloudflared/config.yml` to `~/.cloudflared/config.yml`, update the `tunnel:` and `credentials-file:` lines to match your tunnel's actual ID
-6. `cloudflared tunnel route dns pebble-services <hostname>` for each public service, then `sudo cloudflared --config ~/.cloudflared/config.yml service install && sudo systemctl start cloudflared`
+5. Update this repo's `cloudflared/config.yml` so `tunnel:` and `credentials-file:` match your tunnel's actual ID, then point the live path at it:
+   `sudo ln -s ~/services/cloudflared/config.yml /etc/cloudflared/config.yml`
+6. `cloudflared tunnel route dns pebble-services <hostname>` for each public service, then `sudo cloudflared service install && sudo systemctl start cloudflared`
 7. `cd ~/services && docker compose build && docker compose up -d`
 
 ## Updating an existing service
@@ -123,7 +136,7 @@ docker compose up -d <service-name>
 For chess-mcp specifically: rebuilds recompile lc0 from source, which takes
 20-40+ minutes natively on a Pi 4. Not a failure, just slow -- let it run.
 
-## Adding a new service (e.g. a future vacuum or Nest MCP)
+## Adding a new service
 
 1. Clone the new service's repo into `~/services/<new-service>/`
 2. Add a service block to `docker-compose.yml` here, following the existing
@@ -131,14 +144,18 @@ For chess-mcp specifically: rebuilds recompile lc0 from source, which takes
    unless-stopped`, an `env_file` if it needs secrets)
 3. If it needs to be reachable by Pebble's cloud agent, add an `env.example`
    for it here, add a hostname entry to `cloudflared/config.yml`'s
-   `ingress:` list pointing at its local port, then on the Pi:
+   `ingress:` list **above the `http_status:404` catch-all** (rules match in
+   order, so anything below it is dead), then on the Pi:
    `cloudflared tunnel route dns pebble-services <new-hostname>` and
    `sudo systemctl restart cloudflared`
 4. If it needs local-network-only access (like Matter/Thread device
    control, which requires being on the same LAN as the device and won't
    work through a tunnel), skip the Cloudflare Tunnel step entirely --
    same as treehouse-library.
-5. Commit and push the updated `docker-compose.yml` / cloudflared config
+5. Add the new service's directory to `.gitignore` here -- each service is
+   its own clone, and without this its whole source tree gets committed into
+   this repo by accident.
+6. Commit and push the updated `docker-compose.yml` / cloudflared config
    here so this repo stays the accurate source of truth.
 
 ## SSH access

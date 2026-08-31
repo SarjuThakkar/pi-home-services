@@ -8,4 +8,6 @@ ingress:
     service: http://localhost:8002
   - hostname: vacuum.sarjuthakkar.com
     service: http://localhost:8003
+  - hostname: thermostat.sarjuthakkar.com
+    service: http://localhost:8004
   - service: http_status:404

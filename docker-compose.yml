@@ -41,6 +41,18 @@ services:
     depends_on:
       - matter-server
 
+  # Voice control for the two Nest thermostats. Unlike the vacuum this one is
+  # cloud-bound: Nest offers no local API for pre-2024 thermostats, so every
+  # command goes out through Google's SDM API and an internet outage takes it
+  # out. No matter-server dependency for the same reason.
+  nest-mcp:
+    build: ./nest-mcp
+    container_name: nest-mcp
+    restart: unless-stopped
+    ports:
+      - "8004:8000"
+    env_file: ./nest-mcp.env
+
   # Matter controller. Talks to Matter devices (currently the Dreame vacuum)
   # over the LAN and exposes a WebSocket API on port 5580 for dreame-mcp.
   #
