@@ -27,6 +27,20 @@ services:
       - "8002:8000"
     env_file: ./skylight-mcp.env
 
+  # Voice control for the Dreame vacuum. Bridge-networked like the other MCPs;
+  # reaches matter-server (which is on host networking) via host.docker.internal.
+  dreame-mcp:
+    build: ./dreame-mcp
+    container_name: dreame-mcp
+    restart: unless-stopped
+    ports:
+      - "8003:8000"
+    env_file: ./dreame-mcp.env
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - matter-server
+
   # Matter controller. Talks to Matter devices (currently the Dreame vacuum)
   # over the LAN and exposes a WebSocket API on port 5580 for dreame-mcp.
   #
