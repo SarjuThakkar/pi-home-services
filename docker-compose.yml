@@ -75,6 +75,21 @@ services:
     # crashes with cryptic renderer errors below about 256MB.
     shm_size: 512m
 
+  # Calorie tracking against Lose It!. Plain httpx, no browser: the web app's
+  # backend is reachable with the cookies its own login endpoint hands out.
+  # The volume is not optional bookkeeping -- Lose It! rate-limits sign-ins
+  # (Cloudflare 1015), so the cached session is what keeps a rebuild from
+  # locking the server out for several minutes.
+  loseit-mcp:
+    build: ./loseit-mcp
+    container_name: loseit-mcp
+    restart: unless-stopped
+    ports:
+      - "8007:8000"
+    env_file: ./loseit-mcp.env
+    volumes:
+      - loseit-session:/session
+
   # Matter controller. Talks to Matter devices (currently the Dreame vacuum)
   # over the LAN and exposes a WebSocket API on port 5580 for dreame-mcp.
   #
@@ -108,3 +123,4 @@ volumes:
   chess-data:
   goodreads-profile:
   matter-data:
+  loseit-session:
