@@ -14,6 +14,11 @@ ingress:
     service: http://localhost:8005
   - hostname: loseit.sarjuthakkar.com
     service: http://localhost:8007
+  # Serves a browser dashboard as well as /mcp, so this hostname gets opened
+  # by hand on a phone rather than only by Pebble. Basic Auth guards the
+  # human-facing routes; /mcp keeps its own bearer token.
+  - hostname: workouts.sarjuthakkar.com
+    service: http://localhost:8008
   # Not a container: the Pebble webhook bridge runs on the host under systemd,
   # because it drives the tmux Claude Code session and reads ~/.claude.
   - hostname: claude.sarjuthakkar.com

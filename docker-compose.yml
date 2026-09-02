@@ -90,6 +90,25 @@ services:
     volumes:
       - loseit-session:/session
 
+  # Workout logging, and the only service here that serves a human-facing UI
+  # through the tunnel as well as an MCP endpoint. Both come off the same
+  # process on the same port -- the dashboard's routes are inserted ahead of
+  # FastMCP's, the way /healthz already is everywhere else -- so /mcp keeps
+  # bearer auth while / and /api sit behind HTTP Basic Auth.
+  #
+  # The volume is the entire workout history. Nothing reconstructs it: unlike
+  # loseit-session or goodreads-profile there is no upstream account holding a
+  # copy, so this is the one volume here whose loss is permanent data loss.
+  workout-mcp:
+    build: ./workout-mcp
+    container_name: workout-mcp
+    restart: unless-stopped
+    ports:
+      - "8008:8000"
+    env_file: ./workout-mcp.env
+    volumes:
+      - workout-data:/data
+
   # Matter controller. Talks to Matter devices (currently the Dreame vacuum)
   # over the LAN and exposes a WebSocket API on port 5580 for dreame-mcp.
   #
@@ -124,3 +143,4 @@ volumes:
   goodreads-profile:
   matter-data:
   loseit-session:
+  workout-data:
