@@ -19,6 +19,11 @@ ingress:
   # human-facing routes; /mcp keeps its own bearer token.
   - hostname: workouts.sarjuthakkar.com
     service: http://localhost:8008
+  # The phonics site -- the only fully public, unauthenticated thing on this
+  # tunnel. It is static files with no backend and no state, so there is
+  # nothing behind it to protect.
+  - hostname: phonics.sarjuthakkar.com
+    service: http://localhost:8009
   # Not a container: the Pebble webhook bridge runs on the host under systemd,
   # because it drives the tmux Claude Code session and reads ~/.claude.
   - hostname: claude.sarjuthakkar.com

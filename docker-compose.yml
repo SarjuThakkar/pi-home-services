@@ -109,6 +109,17 @@ services:
     volumes:
       - workout-data:/data
 
+  # The phonics site: 120 daily reading lessons. Pure static files served by
+  # nginx -- no backend, no database, no state on the server at all. A family's
+  # progress lives in their own browser, which is why there is nothing here to
+  # back up and nothing to sign into.
+  phonics:
+    build: ./phonics
+    container_name: phonics
+    restart: unless-stopped
+    ports:
+      - "8009:8000"
+
   # Matter controller. Talks to Matter devices (currently the Dreame vacuum)
   # over the LAN and exposes a WebSocket API on port 5580 for dreame-mcp.
   #
