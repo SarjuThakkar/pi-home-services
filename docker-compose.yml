@@ -119,6 +119,26 @@ services:
     restart: unless-stopped
     ports:
       - "8009:8000"
+    volumes:
+      # Recordings and the manifest that indexes them are bind-mounted rather
+      # than baked into the image, so a recording made on a phone is audible on
+      # the site the moment it uploads -- no rebuild, no redeploy.
+      - ./phonics/web/audio/human:/usr/share/nginx/html/audio/human
+      - ./phonics/web/data/audio-manifest.json:/usr/share/nginx/html/data/audio-manifest.json
+
+  # The only write path in the whole phonics site: /record.html posts takes
+  # here. Shares the recordings directory with the nginx container above.
+  # Bearer token in phonics-upload.env; it can do nothing but write audio
+  # files whose names come from the speech index.
+  phonics-upload:
+    build: ./phonics/server
+    container_name: phonics-upload
+    restart: unless-stopped
+    ports:
+      - "8010:8000"
+    env_file: ./phonics-upload.env
+    volumes:
+      - ./phonics/web:/web
 
   # Matter controller. Talks to Matter devices (currently the Dreame vacuum)
   # over the LAN and exposes a WebSocket API on port 5580 for dreame-mcp.

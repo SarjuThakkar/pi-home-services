@@ -22,6 +22,12 @@ ingress:
   # The phonics site -- the only fully public, unauthenticated thing on this
   # tunnel. It is static files with no backend and no state, so there is
   # nothing behind it to protect.
+  # Path rule first: everything under /api/ is the recordings uploader, the
+  # rest of the hostname is the static site. Order matters here -- cloudflared
+  # takes the first rule that matches.
+  - hostname: phonics.sarjuthakkar.com
+    path: ^/api/.*
+    service: http://localhost:8010
   - hostname: phonics.sarjuthakkar.com
     service: http://localhost:8009
   # Not a container: the Pebble webhook bridge runs on the host under systemd,
