@@ -30,6 +30,10 @@ ingress:
     service: http://localhost:8010
   - hostname: phonics.sarjuthakkar.com
     service: http://localhost:8009
+  # Fantasy football standings -- public on purpose, the whole league views
+  # it. Static site, no backend, nothing behind it to protect.
+  - hostname: football.sarjuthakkar.com
+    service: http://localhost:8011
   # Not a container: the Pebble webhook bridge runs on the host under systemd,
   # because it drives the tmux Claude Code session and reads ~/.claude.
   - hostname: claude.sarjuthakkar.com

@@ -140,6 +140,16 @@ services:
     volumes:
       - ./phonics/web:/web
 
+  # Fantasy football victory-point standings for Sarju's Sleeper league.
+  # Static files only: viewers' browsers read Sleeper's public API directly,
+  # so there is no backend, no credentials and no state here. Private repo.
+  football:
+    build: ./football
+    container_name: football
+    restart: unless-stopped
+    ports:
+      - "8011:8000"
+
   # Matter controller. Talks to Matter devices (currently the Dreame vacuum)
   # over the LAN and exposes a WebSocket API on port 5580 for dreame-mcp.
   #
