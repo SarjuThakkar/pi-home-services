@@ -34,6 +34,9 @@ ingress:
   # it. Static site, no backend, nothing behind it to protect.
   - hostname: football.sarjuthakkar.com
     service: http://localhost:8011
+  # Last Math Standing -- public static page, nothing behind it.
+  - hostname: lms.sarjuthakkar.com
+    service: http://localhost:8012
   # Not a container: the Pebble webhook bridge runs on the host under systemd,
   # because it drives the tmux Claude Code session and reads ~/.claude.
   - hostname: claude.sarjuthakkar.com

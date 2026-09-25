@@ -150,6 +150,15 @@ services:
     ports:
       - "8011:8000"
 
+  # Last Math Standing -- a single-page mental-math drill. Static file, no
+  # backend, no state.
+  lms:
+    build: ./lms
+    container_name: lms
+    restart: unless-stopped
+    ports:
+      - "8012:8000"
+
   # Matter controller. Talks to Matter devices (currently the Dreame vacuum)
   # over the LAN and exposes a WebSocket API on port 5580 for dreame-mcp.
   #
