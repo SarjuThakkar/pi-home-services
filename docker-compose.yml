@@ -159,6 +159,15 @@ services:
     ports:
       - "8012:8000"
 
+  # Drunk spelling bee for parties. Static files, no backend, no state
+  # (game state lives in the host's browser localStorage).
+  sb:
+    build: ./sb
+    container_name: sb
+    restart: unless-stopped
+    ports:
+      - "8013:8000"
+
   # Matter controller. Talks to Matter devices (currently the Dreame vacuum)
   # over the LAN and exposes a WebSocket API on port 5580 for dreame-mcp.
   #
